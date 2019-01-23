@@ -1,0 +1,52 @@
+The methods I used for this assignment are based on https://github.com/matterport/Mask_RCNN
+
+The methods I imported are-
+1) model - The main Mask R-CNN model implemenetation.
+2) config - Mask R-CNN Base Configurations class.
+3) Mask R-CNN Common utility functions and classes.
+
+Steps I took and why I took them-
+
+I used Mask R-CNN model because this library has some cool, ready to use inbuilt methods.
+
+##Modularization##-
+Modular code is code which is separated into independent modules. 
+It makes testing easier and it defines how maintainable the code is.
+
+I modularized the code into small parts as it makes the code easy to understand, troubleshoot and easy to test.
+
+There are 3 main modules which aren't imported-
+	1) config2.py - 
+		It uses config module and it moulds the parameters like-
+		a) How many CPU, GPU cores to use an some model and how many images to process on a core.
+		b) Model defining parameters like number of classes, image dimensions (As the dimensions of images weren't constant so I chose 512, 512 for this assignment).
+		c) Hyper parameters like strides, pool size, detection threshold and confidence.
+	
+	2) dataset.py - 
+		a) This module is used to import the dataset into our model.
+		b) NucleiDataset - The main class which has all the operations to apply on the dataset like-
+			i) add_nuclei - parameters it takes - directory and mode of dataset(train, val, test).
+				It adds image details to the NucleiDataset instance.
+			ii) load_image - uses the add_nuclei details to load the images.
+			iii) image_reference - it returns the details of an image using it's image_id.
+			iv) load_mask - it loads the mask images to the dataset.
+	
+	3) nuclei_detector - 
+	There are two of this module-
+		a) Training phase-
+			i) This is the main method which uses all the methods we imported or created ourselves.
+			ii) First thing we did in this method is import the dataset.
+			iii) Then I instantiated the model on training mode.
+			iv) Then I decided thich weights to use as there are options like imagenet and coco.
+			v) Only the heads. Here we're freezing all the backbone layers and training only the randomly initialized layers 
+    			   (i.e. the ones that we didn't use pre-trained weights from MS COCO). To train only the head layers, 
+    			   pass layers='heads' to the train() function.
+			vi) Fine-tune all layers. For this simple example it's not necessary, but we're including it to show the process. 
+    			   Simply pass layers="all to train all layers.
+		b) detection phase-
+			i) Created an interence config class in which I specified how many gpus' to use and image dimensions and maximum number of ground truth instances to use in one image.
+			ii) Then I instantiated the model on inference mode.
+			iii) Then I loaded the weithts I created during the training phase.
+			iv) Then I tested the predictions made on random images from the dataset.
+			v) Then I used the compute_metric_masks in utils module to get average precision.
+			vi) Then I calculated the mean of average precision which gave me the maP which I printed on the console.
